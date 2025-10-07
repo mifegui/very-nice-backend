@@ -17,6 +17,7 @@ router.post("/register", async (req, res) => {
     res.status(201).json({ message: "User registered" });
   } catch (err) {
     res.status(400).json({ error: "User already exists" });
+    console.log(err)
   }
 });
 
@@ -29,10 +30,10 @@ router.post("/login", async (req, res) => {
 
   if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
-  const isValid = bcrypt.compare(password, user.password); 
+  const isValid = await bcrypt.compare(password, user.password); 
   if (!isValid) return res.status(401).json({ error: "Invalid credentials" });
 
-  const token = jwt.sign({ id: user.id }, process.env.JWT_SECERT!, {
+  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, {
     expiresIn: "1h",
   });
 
