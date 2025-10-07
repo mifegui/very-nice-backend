@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: nice-backend-postgres
+    environment:
+      POSTGRES_DB: assessment_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: verysecure
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Node.js Application
+  app:
+    build: .
+    container_name: nice-backend-app
+    environment:
+      DATABASE_URL: postgresql://postgres:verysecure@postgres:5432/assessment_db
+      JWT_SECRET: your_super_secret_jwt_key_here
+      NODE_ENV: production
+      PORT: 4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:

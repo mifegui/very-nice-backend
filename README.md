@@ -13,7 +13,7 @@ Actually a local database connectivity user, discovered that by adding console.l
 
 
 * User relation doesnt exist
-Even after running migration. After examining db, the mgiration was run on the main scheme, not on created db. Turns out the silly $DATABASE_URL was not doing its thing on npm run. Temporarly changed it to put the connection string inline so it ran properly. And dropped the incorrectly created table. Longterm solution involves using something like dotenv-cli or defining the env variable in the shell/env instead of/besides the .env file.
+Even after running migration. After examining db, the mgiration was run on the main scheme, not on created db. Turns out the silly $DATABASE_URL was not doing its thing on npm run. Temporarly changed it to put the connection string inline on package.json so it ran properly (this is insecure). And dropped the incorrectly created table. Longterm solution involves using something like dotenv-cli or defining the env variable in the shell/env instead of/besides the .env file.
 
 
 * secretOrPrivateKey must have a value
@@ -25,3 +25,29 @@ When trying to access the profile route. After adding a console log on the catch
 
 * Could login with wrong password
 After testing with wrong password, it would still return a token. After reading the code that was supposed to check that, I saw bcrypt.compare returned a promise that was not beeing awaited before checking for its value. Fixed by awaiting it.
+
+
+
+## Further considerations
+
+"authorization-token" header is kinda non-standard. It would be better to use "Authorization" header and "Bearer" prefix for consistency and to not break dev expectations.
+
+Might not want to return the hashed password in the profile route if in the future it becomes public (currently its protected by the auth middleware)
+
+Lacked some other checks like if email and password were even passed in the body.
+
+Dockerfile not optimized for production.
+
+## Other stuff
+
+**Run with Docker:**
+```bash
+docker-compose up --build
+docker exec -it nice-backend-app npm run migrate
+```
+
+**Run Tests:**
+
+```bash
+npm test
+```

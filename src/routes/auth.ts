@@ -7,6 +7,7 @@ const router = Router();
 
 router.post("/register", async (req, res) => {
   const { email, password } = req.body;
+  if (!email || !password) return res.status(401).json({ error: "Invalid credentials" });
   const hashed = await bcrypt.hash(password, 10);
 
   try {
@@ -17,7 +18,6 @@ router.post("/register", async (req, res) => {
     res.status(201).json({ message: "User registered" });
   } catch (err) {
     res.status(400).json({ error: "User already exists" });
-    console.log(err)
   }
 });
 
@@ -28,7 +28,7 @@ router.post("/login", async (req, res) => {
   ]);
   const user = result.rows[0];
 
-  if (!user) return res.status(401).json({ error: "Invalid credentials" });
+  if (!user || !password) return res.status(401).json({ error: "Invalid credentials" });
 
   const isValid = await bcrypt.compare(password, user.password); 
   if (!isValid) return res.status(401).json({ error: "Invalid credentials" });
